@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Banking Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Banking Simulator</h1>
+
+    <!-- Create Account -->
+    <section>
+        <h2>Create Account</h2>
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="number" id="balance" placeholder="Initial Balance">
+        <button onclick="createAccount()">Create</button>
+    </section>
+
+    <!-- Deposit -->
+    <section>
+        <h2>Deposit</h2>
+        <input type="number" id="depositAccountId" placeholder="Account ID">
+        <input type="number" id="depositAmount" placeholder="Amount">
+        <button onclick="deposit()">Deposit</button>
+    </section>
+
+    <!-- Withdraw -->
+    <section>
+        <h2>Withdraw</h2>
+        <input type="number" id="withdrawAccountId" placeholder="Account ID">
+        <input type="number" id="withdrawAmount" placeholder="Amount">
+        <button onclick="withdraw()">Withdraw</button>
+    </section>
+
+    <!-- Transfer -->
+    <section>
+        <h2>Transfer</h2>
+        <input type="number" id="fromId" placeholder="From Account ID">
+        <input type="number" id="toId" placeholder="To Account ID">
+        <input type="number" id="transferAmount" placeholder="Amount">
+        <button onclick="transfer()">Transfer</button>
+    </section>
+
+    <!-- Account List -->
+    <section>
+        <h2>Accounts</h2>
+        <button onclick="loadAccounts()">Refresh</button>
+        <ul id="accountsList"></ul>
+    </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
