@@ -1,56 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Banking Simulator</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>Banking Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="app-shell">
 
-<div class="container">
-    <h1>Banking Simulator</h1>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-mark">B</span>
+        <span class="logo-text">BankSim</span>
+      </div>
 
-    <!-- Create Account -->
-    <section>
-        <h2>Create Account</h2>
-        <input type="text" id="name" placeholder="Full Name">
-        <input type="number" id="balance" placeholder="Initial Balance">
-        <button onclick="createAccount()">Create</button>
-    </section>
+      <nav class="nav">
+        <a href="#" class="nav-item active"><span class="nav-icon">🏦</span><span>Dashboard</span></a>
+        <a href="#" class="nav-item"><span class="nav-icon">💸</span><span>Transfers</span></a>
+        <a href="#" class="nav-item"><span class="nav-icon">📊</span><span>Analytics</span></a>
+        <a href="#" class="nav-item"><span class="nav-icon">⚙️</span><span>Settings</span></a>
+      </nav>
 
-    <!-- Deposit -->
-    <section>
-        <h2>Deposit</h2>
-        <input type="number" id="depositAccountId" placeholder="Account ID">
-        <input type="number" id="depositAmount" placeholder="Amount">
-        <button onclick="deposit()">Deposit</button>
-    </section>
+      <div class="sidebar-footer">
+        <div class="user">
+          <div class="user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name">User</div>
+            <div class="user-role">Simulator</div>
+          </div>
+        </div>
+      </div>
+    </aside>
 
-    <!-- Withdraw -->
-    <section>
-        <h2>Withdraw</h2>
-        <input type="number" id="withdrawAccountId" placeholder="Account ID">
-        <input type="number" id="withdrawAmount" placeholder="Amount">
-        <button onclick="withdraw()">Withdraw</button>
-    </section>
+    <!-- Main -->
+    <main class="main">
 
-    <!-- Transfer -->
-    <section>
-        <h2>Transfer</h2>
-        <input type="number" id="fromId" placeholder="From Account ID">
-        <input type="number" id="toId" placeholder="To Account ID">
-        <input type="number" id="transferAmount" placeholder="Amount">
-        <button onclick="transfer()">Transfer</button>
-    </section>
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1>Banking Simulator</h1>
+          <p class="subtitle">All values start at zero. Configure your simulation.</p>
+        </div>
+        <div class="topbar-right">
+          <button class="btn ghost">Export</button>
+          <button class="btn primary">Run</button>
+        </div>
+      </header>
 
-    <!-- Account List -->
-    <section>
-        <h2>Accounts</h2>
-        <button onclick="loadAccounts()">Refresh</button>
-        <ul id="accountsList"></ul>
-    </section>
-</div>
+      <!-- Summary -->
+      <section class="summary-grid">
+        <article class="card summary-card">
+          <div class="card-header"><span class="card-label">Total Balance</span></div>
+          <div class="card-body">
+            <div class="summary-value">€0.00</div>
+            <div class="summary-trend neutral">No activity</div>
+          </div>
+        </article>
 
-<script src="app.js"></script>
+        <article class="card summary-card">
+          <div class="card-header"><span class="card-label">Credit Score</span></div>
+          <div class="card-body">
+            <div class="summary-value">0</div>
+            <div class="summary-trend neutral">No data</div>
+          </div>
+        </article>
+
+        <article class="card summary-card">
+          <div class="card-header"><span class="card-label">Monthly Cash Flow</span></div>
+          <div class="card-body">
+            <div class="summary-value">€0.00</div>
+            <div class="summary-trend neutral">No data</div>
+          </div>
+        </article>
+
+        <article class="card summary-card">
+          <div class="card-header"><span class="card-label">Risk Level</span></div>
+          <div class="card-body">
+            <div class="summary-value">None</div>
+            <div class="summary-trend neutral">No profile</div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Main grid -->
+      <section class="content-grid">
+
+        <!-- Accounts -->
+        <section class="card accounts-card">
+          <div class="card-header">
+            <h2>Accounts</h2>
+            <button class="btn ghost small">Add</button>
+          </div>
+          <div class="card-body accounts-list empty-state">
+            <p>No accounts created yet.</p>
+          </div>
+        </section>
+
+        <!-- Transfer -->
+        <section class="card transfer-card">
+          <div class="card-header"><h2>Transfer Simulator</h2></div>
+          <div class="card-body">
+            <form class="form-grid">
+
+              <div class="form-field">
+                <label>From account</label>
+                <select><option value="">Select</option></select>
+              </div>
+
+              <div class="form-field">
+                <label>To account</label>
+                <select><option value="">Select</option></select>
+              </div>
+
+              <div class="form-field">
+                <label>Amount</label>
+                <div class="input-with-prefix">
+                  <span>€</span>
+                  <input type="number" placeholder="0.00" min="0" step="0.01" />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label>Scenario</label>
+                <select><option value="">Select</option></select>
+              </div>
+
+              <div class="form-field full-width">
+                <label>Note</label>
+                <input type="text" placeholder="Optional" />
+              </div>
+
+              <div class="form-actions">
+                <button type="reset" class="btn ghost">Reset</button>
+                <button type="button" class="btn primary">Simulate</button>
+              </div>
+
+            </form>
+          </div>
+        </section>
+
+        <!-- Activity -->
+        <section class="card activity-card">
+          <div class="card-header"><h2>Recent Activity</h2></div>
+          <div class="card-body activity-body empty-state">
+            <p>No activity yet.</p>
+          </div>
+        </section>
+
+      </section>
+
+      <footer class="footer">
+        <span>BankSim • Zero-state environment</span>
+        <span>v1.0</span>
+      </footer>
+
+    </main>
+  </div>
 </body>
 </html>
