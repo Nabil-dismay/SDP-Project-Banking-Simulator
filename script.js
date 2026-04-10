@@ -1,14 +1,18 @@
 let accounts = [];
 
-// 2. Selectors
+// Selectors
 const accountListContainer = document.querySelector('.accounts-list');
 const addAccountBtn = document.querySelector('.accounts-card .btn.small');
 const fromSelect = document.querySelectorAll('select')[0];
 const toSelect = document.querySelectorAll('select')[1];
+const amountInput = document.querySelector("input[type='number']");
+const simulateBtn = document.querySelector(".form-actions .btn.primary");
 const balanceDisplay = document.querySelector('.summary-value');
 
+// -----------------------------
+// RENDER
+// -----------------------------
 function renderAccounts() {
-    // Clear current list
     accountListContainer.innerHTML = '';
 
     if (accounts.length === 0) {
@@ -19,18 +23,16 @@ function renderAccounts() {
     accounts.forEach((acc, index) => {
         const accDiv = document.createElement('div');
         accDiv.className = 'account-item';
-        accDiv.style.cssText = 'display:flex; justify-content:space-between; padding:10px; background:var(--bg-soft); border-radius:10px; margin-bottom:8px; border:1px solid var(--border);';
+        accDiv.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border:1px solid var(--border); margin-bottom:8px;';
         
         accDiv.innerHTML = `
             <div>
-                <div style="font-weight:600; font-size:14px;">${acc.name}</div>
-                <div style="font-size:12px; color:var(--text-muted);">${acc.type}</div>
+                <div>${acc.name}</div>
+                <div>${acc.type || ''}</div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="font-weight:600; color:var(--accent2);">€${acc.balance.toFixed(2)}</div>
-                <button class="delete-btn" data-index="${index}" style="background:red; color:white; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">
-                    ✕
-                </button>
+            <div style="display:flex; gap:10px;">
+                <span>€${acc.balance.toFixed(2)}</span>
+                <button class="delete-btn" data-id="${acc.id}">✕</button>
             </div>
         `;
         accountListContainer.appendChild(accDiv);
@@ -40,47 +42,111 @@ function renderAccounts() {
     updateTotalBalance();
 }
 
+// -----------------------------
 function updateDropdowns() {
-    const options = accounts.map((acc, index) => `<option value="${index}">${acc.name}</option>`).join('');
-    const placeholder = '<option value="">Select</option>';
-    
-    fromSelect.innerHTML = placeholder + options;
-    toSelect.innerHTML = placeholder + options;
+    const options = accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+    fromSelect.innerHTML = '<option value="">Select</option>' + options;
+    toSelect.innerHTML = '<option value="">Select</option>' + options;
 }
 
+// -----------------------------
 function updateTotalBalance() {
     const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
-    balanceDisplay.textContent = `€${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    balanceDisplay.textContent = `€${total.toFixed(2)}`;
 }
 
+// -----------------------------
+// ADD ACCOUNT
+// -----------------------------
 addAccountBtn.addEventListener('click', () => {
-    const name = prompt("Enter Account Name (e.g., Main Savings):");
+    const name = prompt("Account name:");
     if (!name) return;
 
-    const type = prompt("Enter Account Type (Checking, Savings, Credit):", "Checking");
-    const initialBalance = parseFloat(prompt("Initial Balance (€):", "0"));
-
-    const newAccount = {
-        id: Date.now(),
+    const newAcc = {
+        id: Date.now().toString(),
         name: name,
-        type: type || 'General',
-        balance: isNaN(initialBalance) ? 0 : initialBalance
+        balance: 0
     };
 
-    accounts.push(newAccount);
+    accounts.push(newAcc);
     renderAccounts();
 });
 
-// ✅ DELETE ACCOUNT (added, minimal)
+// -----------------------------
+// DELETE
+// -----------------------------
 accountListContainer.addEventListener("click", (e) => {
     if (e.target.classList.contains("delete-btn")) {
-        const index = e.target.getAttribute("data-index");
-
-        if (!confirm("Delete this account?")) return;
-
-        accounts.splice(index, 1);
+        const id = e.target.getAttribute("data-id");
+        accounts = accounts.filter(acc => acc.id != id);
         renderAccounts();
     }
 });
 
+// -----------------------------
+// SIMULATE (Deposit / Withdraw / Transfer)
+// -----------------------------
+simulateBtn.addEventListener("click", () => {
+    const fromId = fromSelect.value;
+    const toId = toSelect.value;
+    const amount = parseFloat(amountInput.value);
+
+    if (isNaN(amount) || amount <= 0) {
+        alert("Invalid amount");
+        return;
+    }
+
+    // DEPOSIT (no to account)
+    if (fromId && !toId) {
+        const acc = accounts.find(a => a.id == fromId);
+        acc.balance += amount;
+        renderAccounts();
+        alert("Deposit successful!");
+        return;
+    }
+
+    // WITHDRAW (same account selected)
+    if (fromId && fromId === toId) {
+        const acc = accounts.find(a => a.id == fromId);
+        if (acc.balance < amount) {
+            alert("Insufficient funds");
+            return;
+        }
+        acc.balance -= amount;
+        renderAccounts();
+        alert("Withdraw successful!");
+        return;
+    }
+
+    // TRANSFER
+    if (fromId && toId && fromId !== toId) {
+        fetch('/api/transfer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                from_account: fromId,
+                to_account: toId,
+                amount: amount
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            const fromAcc = accounts.find(a => a.id == fromId);
+            const toAcc = accounts.find(a => a.id == toId);
+
+            fromAcc.balance -= amount;
+            toAcc.balance += amount;
+
+            renderAccounts();
+            alert("Transfer successful!");
+        });
+    }
+});
+
+// -----------------------------
 renderAccounts();
