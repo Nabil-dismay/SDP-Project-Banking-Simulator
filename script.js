@@ -26,7 +26,12 @@ function renderAccounts() {
                 <div style="font-weight:600; font-size:14px;">${acc.name}</div>
                 <div style="font-size:12px; color:var(--text-muted);">${acc.type}</div>
             </div>
-            <div style="font-weight:600; color:var(--accent2);">€${acc.balance.toFixed(2)}</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="font-weight:600; color:var(--accent2);">€${acc.balance.toFixed(2)}</div>
+                <button class="delete-btn" data-index="${index}" style="background:red; color:white; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">
+                    ✕
+                </button>
+            </div>
         `;
         accountListContainer.appendChild(accDiv);
     });
@@ -36,22 +41,19 @@ function renderAccounts() {
 }
 
 function updateDropdowns() {
-    const options = accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+    const options = accounts.map((acc, index) => `<option value="${index}">${acc.name}</option>`).join('');
     const placeholder = '<option value="">Select</option>';
     
     fromSelect.innerHTML = placeholder + options;
     toSelect.innerHTML = placeholder + options;
 }
 
-
 function updateTotalBalance() {
     const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
     balanceDisplay.textContent = `€${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 }
 
-
 addAccountBtn.addEventListener('click', () => {
-    // Simple prompt for the simulator
     const name = prompt("Enter Account Name (e.g., Main Savings):");
     if (!name) return;
 
@@ -69,49 +71,16 @@ addAccountBtn.addEventListener('click', () => {
     renderAccounts();
 });
 
-renderAccounts();
-// -----------------------------
-// STATE (your accounts)
-// -----------------------------
-let accounts = [
-  { name: "Account 1", balance: 0 },
-  { name: "Account 2", balance: 0 }
-];
+// ✅ DELETE ACCOUNT (added, minimal)
+accountListContainer.addEventListener("click", (e) => {
+    if (e.target.classList.contains("delete-btn")) {
+        const index = e.target.getAttribute("data-index");
 
-// -----------------------------
-// CONSTS (DOM)
-// -----------------------------
-const fromSelect = document.querySelectorAll("select")[0];
-const amountInput = document.querySelector("input[type='number']");
-const simulateBtn = document.querySelector(".form-actions .btn.primary");
-const totalBalanceEl = document.querySelector(".summary-card .summary-value");
+        if (!confirm("Delete this account?")) return;
 
-// -----------------------------
-// UPDATE TOTAL BALANCE
-// -----------------------------
-function updateTotalBalance() {
-  const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
-  totalBalanceEl.textContent = `€${total.toFixed(2)}`;
-}
-
-// -----------------------------
-// DEPOSIT FEATURE
-// -----------------------------
-simulateBtn.addEventListener("click", () => {
-  const accIndex = fromSelect.value;
-  const amount = parseFloat(amountInput.value);
-
-  // Validation
-  if (accIndex === "" || isNaN(amount) || amount <= 0) {
-    alert("Invalid input");
-    return;
-  }
-
-  // Deposit
-  accounts[accIndex].balance += amount;
-
-  // Update UI
-  updateTotalBalance();
-
-  alert("Deposit successful!");
+        accounts.splice(index, 1);
+        renderAccounts();
+    }
 });
+
+renderAccounts();
