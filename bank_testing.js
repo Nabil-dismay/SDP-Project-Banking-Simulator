@@ -1,79 +1,61 @@
-// banking.js
+import {
+    state,
+    addAccount,
+    deposit,
+    withdraw,
+    transfer,
+    getTotalBalance,
+    resetState
+} from "./script.js";
 
-export const state = {
-    accounts: []
-};
+beforeEach(() => {
+    resetState();
+});
 
-// --------------------
-// HELPERS
-// --------------------
-function findAccount(id) {
-    return state.accounts.find(a => a.id === id);
-}
+test("addAccount works", () => {
+    const acc = addAccount("John");
 
-// --------------------
-// CORE FUNCTIONS
-// --------------------
-export function addAccount(name) {
-    const newAcc = {
-        id: Date.now().toString(),
-        name,
-        balance: 0
-    };
+    expect(acc.name).toBe("John");
+    expect(acc.balance).toBe(0);
+});
 
-    state.accounts.push(newAcc);
-    return newAcc;
-}
+test("deposit works", () => {
+    const acc = addAccount("John");
 
-export function deleteAccount(id) {
-    state.accounts = state.accounts.filter(acc => acc.id !== id);
-}
+    deposit(acc.id, 100);
 
-export function deposit(accountId, amount) {
-    if (!accountId || amount <= 0 || isNaN(amount)) {
-        throw new Error("Invalid deposit");
-    }
+    expect(acc.balance).toBe(100);
+});
 
-    const acc = findAccount(accountId);
-    if (!acc) throw new Error("Account not found");
+test("withdraw works", () => {
+    const acc = addAccount("John");
 
-    acc.balance += amount;
-    return acc.balance;
-}
+    deposit(acc.id, 100);
+    withdraw(acc.id, 40);
 
-export function withdraw(accountId, amount) {
-    if (!accountId || amount <= 0 || isNaN(amount)) {
-        throw new Error("Invalid withdraw");
-    }
+    expect(acc.balance).toBe(60);
+});
 
-    const acc = findAccount(accountId);
-    if (!acc) throw new Error("Account not found");
+test("transfer works", () => {
+    const a = addAccount("A");
+    const b = addAccount("B");
 
-    if (acc.balance < amount) {
-        throw new Error("Insufficient funds");
-    }
+    deposit(a.id, 100);
 
-    acc.balance -= amount;
-    return acc.balance;
-}
+    const result = transfer(a.id, b.id, 30);
 
-export function transfer(fromId, toId, amount) {
-    if (!fromId || !toId || amount <= 0) {
-        throw new Error("Invalid transfer");
-    }
+    expect(result.from).toBe(70);
+    expect(result.to).toBe(30);
 
-    const from = findAccount(fromId);
-    const to = findAccount(toId);
+    expect(getTotalBalance()).toBe(100);
+});
 
-    if (!from || !to) throw new Error("Account not found");
-    if (from.balance < amount) throw new Error("Insufficient funds");
+test("total balance works", () => {
+    const a = addAccount("A");
+    const b = addAccount("B");
 
-    from.balance -= amount;
-    to.balance += amount;
+    deposit(a.id, 100);
+    deposit(b.id, 50);
 
-    return { from: from.balance, to: to.balance };
-}
-
-export function getTotalBalance() {
-    return state.accounts.reduce((sum, a) => sum + a.balance, 0);
-}
+    expect(getTotalBalance()).toBe(150);
+});

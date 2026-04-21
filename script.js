@@ -1,152 +1,78 @@
-let accounts = [];
+export const state = {
+    accounts: []
+};
 
-// Selectors
-const accountListContainer = document.querySelector('.accounts-list');
-const addAccountBtn = document.querySelector('.accounts-card .btn.small');
-const fromSelect = document.querySelectorAll('select')[0];
-const toSelect = document.querySelectorAll('select')[1];
-const amountInput = document.querySelector("input[type='number']");
-const simulateBtn = document.querySelector(".form-actions .btn.primary");
-const balanceDisplay = document.querySelector('.summary-value');
-
-// -----------------------------
-// RENDER
-// -----------------------------
-function renderAccounts() {
-    accountListContainer.innerHTML = '';
-
-    if (accounts.length === 0) {
-        accountListContainer.innerHTML = '<p class="empty-state">No accounts created yet.</p>';
-        return;
-    }
-
-    accounts.forEach((acc, index) => {
-        const accDiv = document.createElement('div');
-        accDiv.className = 'account-item';
-        accDiv.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border:1px solid var(--border); margin-bottom:8px;';
-        
-        accDiv.innerHTML = `
-            <div>
-                <div>${acc.name}</div>
-                <div>${acc.type || ''}</div>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <span>€${acc.balance.toFixed(2)}</span>
-                <button class="delete-btn" data-id="${acc.id}">✕</button>
-            </div>
-        `;
-        accountListContainer.appendChild(accDiv);
-    });
-
-    updateDropdowns();
-    updateTotalBalance();
+function findAccount(id) {
+    return state.accounts.find(a => a.id === id);
 }
 
-// -----------------------------
-function updateDropdowns() {
-    const options = accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-    fromSelect.innerHTML = '<option value="">Select</option>' + options;
-    toSelect.innerHTML = '<option value="">Select</option>' + options;
+export function resetState() {
+    state.accounts = [];
 }
 
-// -----------------------------
-function updateTotalBalance() {
-    const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
-    balanceDisplay.textContent = `€${total.toFixed(2)}`;
-}
-
-// -----------------------------
-// ADD ACCOUNT
-// -----------------------------
-addAccountBtn.addEventListener('click', () => {
-    const name = prompt("Account name:");
-    if (!name) return;
-
-    const newAcc = {
+export function addAccount(name) {
+    const acc = {
         id: Date.now().toString(),
-        name: name,
+        name,
         balance: 0
     };
 
-    accounts.push(newAcc);
-    renderAccounts();
-});
+    state.accounts.push(acc);
+    return acc;
+}
 
-// -----------------------------
-// DELETE
-// -----------------------------
-accountListContainer.addEventListener("click", (e) => {
-    if (e.target.classList.contains("delete-btn")) {
-        const id = e.target.getAttribute("data-id");
-        accounts = accounts.filter(acc => acc.id != id);
-        renderAccounts();
-    }
-});
+export function deleteAccount(id) {
+    state.accounts = state.accounts.filter(a => a.id !== id);
+}
 
-// -----------------------------
-// SIMULATE (Deposit / Withdraw / Transfer)
-// -----------------------------
-simulateBtn.addEventListener("click", () => {
-    const fromId = fromSelect.value;
-    const toId = toSelect.value;
-    const amount = parseFloat(amountInput.value);
-
-    if (isNaN(amount) || amount <= 0) {
-        alert("Invalid amount");
-        return;
+export function deposit(accountId, amount) {
+    if (!accountId || amount <= 0 || isNaN(amount)) {
+        throw new Error("Invalid deposit");
     }
 
-    // DEPOSIT (no to account)
-    if (fromId && !toId) {
-        const acc = accounts.find(a => a.id == fromId);
-        acc.balance += amount;
-        renderAccounts();
-        alert("Deposit successful!");
-        return;
+    const acc = findAccount(accountId);
+    if (!acc) throw new Error("Account not found");
+
+    acc.balance += amount;
+    return acc.balance;
+}
+
+export function withdraw(accountId, amount) {
+    if (!accountId || amount <= 0 || isNaN(amount)) {
+        throw new Error("Invalid withdraw");
     }
 
-    // WITHDRAW (same account selected)
-    if (fromId && fromId === toId) {
-        const acc = accounts.find(a => a.id == fromId);
-        if (acc.balance < amount) {
-            alert("Insufficient funds");
-            return;
-        }
-        acc.balance -= amount;
-        renderAccounts();
-        alert("Withdraw successful!");
-        return;
+    const acc = findAccount(accountId);
+    if (!acc) throw new Error("Account not found");
+
+    if (acc.balance < amount) {
+        throw new Error("Insufficient funds");
     }
 
-    // TRANSFER
-    if (fromId && toId && fromId !== toId) {
-        fetch('/api/transfer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                from_account: fromId,
-                to_account: toId,
-                amount: amount
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-                return;
-            }
+    acc.balance -= amount;
+    return acc.balance;
+}
 
-            const fromAcc = accounts.find(a => a.id == fromId);
-            const toAcc = accounts.find(a => a.id == toId);
-
-            fromAcc.balance -= amount;
-            toAcc.balance += amount;
-
-            renderAccounts();
-            alert("Transfer successful!");
-        });
+export function transfer(fromId, toId, amount) {
+    if (!fromId || !toId || amount <= 0) {
+        throw new Error("Invalid transfer");
     }
-});
 
-// -----------------------------
-renderAccounts();
+    const from = findAccount(fromId);
+    const to = findAccount(toId);
+
+    if (!from || !to) throw new Error("Account not found");
+    if (from.balance < amount) throw new Error("Insufficient funds");
+
+    from.balance -= amount;
+    to.balance += amount;
+
+    return {
+        from: from.balance,
+        to: to.balance
+    };
+}
+
+export function getTotalBalance() {
+    return state.accounts.reduce((sum, a) => sum + a.balance, 0);
+}
