@@ -1,4 +1,16 @@
-account = {
+const { account } = require("./HistoryLogs");
+const { generateReport } = require("./FinalReport");
+
+// Reset helper
+function resetAccount(data) {
+  account.owner = data.owner;
+  account.balance = data.balance;
+  account.history = data.history;
+}
+
+// TESTS
+
+resetAccount({
   owner: "Alice",
   balance: 1000,
   history: [
@@ -6,84 +18,22 @@ account = {
     { type: "WITHDRAW", amount: 200 },
     { type: "TRANSFER", amount: 300 }
   ]
-};
+});
+generateReport();
 
-account = {
-  owner: "Bob",
-  balance: 2000,
-  history: [
-    { type: "DEPOSIT", amount: 300 },
-    { type: "DEPOSIT", amount: 700 },
-    { type: "WITHDRAW", amount: 100 },
-    { type: "WITHDRAW", amount: 200 }
-  ]
-};
-
-account = {
+resetAccount({
   owner: "Charlie",
   balance: 0,
   history: []
-};
+});
+generateReport();
 
-account = {
+resetAccount({
   owner: "Dana",
   balance: 500,
   history: [
     { type: "DEPOSIT", amount: 200 },
     { type: "BONUS", amount: 100 }
   ]
-};
-
-account = {
-  owner: "Eve",
-  balance: 300,
-  history: [
-    { type: "DEPOSIT" }
-  ]
-};
-
-account = {
-  owner: "Frank",
-  balance: 100,
-  history: [
-    { type: "DEPOSIT", amount: -500 },
-    { type: "WITHDRAW", amount: -100 }
-  ]
-};
-
-account = {
-  owner: "Grace",
-  balance: 800,
-  history: [
-    { type: "deposit", amount: 100 },
-    { type: "WITHDRAW", amount: 50 }
-  ]
-};
-
-account = {
-  owner: "Henry",
-  balance: 1_000_000,
-  history: [
-    { type: "DEPOSIT", amount: 900000 },
-    { type: "TRANSFER", amount: 800000 }
-  ]
-};
-
-account = {
-  owner: "Ivy",
-  balance: 100,
-  history: null
-};
-
-account = undefined;
-
-history: [
-  { type: "TRANSFER", amount: 300 },
-  { type: "DEPOSIT", amount: 500 },
-  { type: "WITHDRAW", amount: 200 }
-]
-
-history: [
-  { type: "DEPOSIT", amount: 0 }
-]
-
+});
+generateReport();
