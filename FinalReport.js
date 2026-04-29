@@ -1,6 +1,6 @@
-const { account } = require("./HistoryLogs");
-
 function generateReport() {
+  const account = global.account;
+
   if (!account || !account.history) {
     console.log("Invalid account");
     return;

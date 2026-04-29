@@ -1,11 +1,16 @@
-const { account } = require("./HistoryLogs");
 const { generateReport } = require("./FinalReport");
 
-// Reset helper
+let account;
+
+// reset helper
 function resetAccount(data) {
-  account.owner = data.owner;
-  account.balance = data.balance;
-  account.history = data.history;
+  account = {
+    owner: data.owner,
+    balance: data.balance,
+    history: data.history
+  };
+
+  global.account = account; // <-- important
 }
 
 // TESTS
