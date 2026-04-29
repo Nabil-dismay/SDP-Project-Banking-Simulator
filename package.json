@@ -1,0 +1,11 @@
+{
+  "name": "sdp-banking-simulator",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node testSuite.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}
