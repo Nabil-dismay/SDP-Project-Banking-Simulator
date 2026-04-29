@@ -1,0 +1,16 @@
+tests:
+  - id: "Test 1: Valid Account"
+    inputs: ["Fadi", "Savings", "1000"]
+    expect:
+      name: "Fadi"
+      balance: 1000
+
+  - id: "Test 2: Empty Name"
+    inputs: ["", "Checking", "500"]
+    expect: "STOP"
+
+  - id: "Test 3: Zero Balance"
+    inputs: ["Student", "General", "0"]
+    expect:
+      name: "Student"
+      balance: 0
